@@ -1,0 +1,20 @@
+<div class="artistes-page">
+  <div class="page-header">
+    <h1>Artistes Populaires</h1>
+    <p>Découvrez vos artistes préférés et explorez leur musique</p>
+  </div>
+
+  <div class="artistes-grid">
+    <div class="artiste-card" *ngFor="let artiste of artistes">
+      <div class="artiste-avatar">
+        <div class="avatar-icon">{{ artiste.icon }}</div>
+      </div>
+      <div class="artiste-info">
+        <h3>{{ artiste.name }}</h3>
+        <p class="genre">{{ artiste.genre }}</p>
+        <p class="followers">{{ artiste.followers }} abonnés</p>
+        <button class="follow-btn">Suivre</button>
+      </div>
+    </div>
+  </div>
+</div>

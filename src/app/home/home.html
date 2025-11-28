@@ -1,0 +1,54 @@
+<div class="home-container">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Votre Musique, Votre Rythme</h1>
+      <p>Découvrez des millions de titres, créez vos playlists personnalisées et partagez votre passion musicale avec le monde entier.</p>
+      <div class="cta-buttons">
+        <button class="btn btn-primary">Commencer Gratuitement</button>
+        <button class="btn btn-secondary">Découvrir Plus</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <h2>Pourquoi Echo Beat ?</h2>
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let feature of features">
+        <div class="feature-icon">{{ feature.icon }}</div>
+        <h3>{{ feature.title }}</h3>
+        <p>{{ feature.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Playlists Section -->
+  <section class="playlists">
+    <div class="playlists-container">
+      <h2>Playlists Populaires</h2>
+      <div class="playlist-grid">
+        <div class="playlist-card" *ngFor="let playlist of playlists">
+          <div class="playlist-img">{{ playlist.icon }}</div>
+          <div class="playlist-info">
+            <h3>{{ playlist.title }}</h3>
+            <p>{{ playlist.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="social-links">
+        <a href="#">📘</a>
+        <a href="#">🐦</a>
+        <a href="#">📷</a>
+        <a href="#">▶️</a>
+      </div>
+      <p>&copy; 2024 Echo Beat. Tous droits réservés. Votre musique, votre passion.</p>
+    </div>
+  </footer>
+</div>

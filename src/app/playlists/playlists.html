@@ -1,0 +1,281 @@
+<div class="playlists-container">
+  <!-- Header avec actions -->
+  <div class="playlists-header">
+    <h1>Mes Playlists</h1>
+    
+    <div class="header-actions">
+      <div class="search-box">
+        <input 
+          type="text" 
+          placeholder="Rechercher une playlist..."
+          [(ngModel)]="searchQuery"
+          (input)="searchPlaylists()"
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+      
+      <button class="btn-primary" (click)="openCreateModal()">
+        ➕ Créer une Playlist
+      </button>
+      
+      <button class="btn-secondary" (click)="openImportModal()">
+        📥 Importer
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des playlists...</p>
+  </div>
+
+  <!-- Grille de playlists -->
+  <div *ngIf="!isLoading" class="playlists-grid">
+    <div 
+      *ngFor="let playlist of filteredPlaylists" 
+      class="playlist-card"
+      (click)="selectPlaylist(playlist)"
+      [class.selected]="selectedPlaylist?.id === playlist.id"
+    >
+      <div class="playlist-cover">
+        <img [src]="playlist.coverImage" [alt]="playlist.name" />
+        <div class="playlist-overlay">
+          <button class="play-btn">▶️</button>
+        </div>
+      </div>
+      
+      <div class="playlist-info">
+        <h3>{{ playlist.name }}</h3>
+        <p class="description">{{ playlist.description }}</p>
+        <div class="playlist-meta">
+          <span>{{ playlist.songs.length }} titres</span>
+          <span>{{ getTotalDuration(playlist) }}</span>
+        </div>
+      </div>
+      
+      <div class="playlist-actions">
+        <button 
+          class="action-btn" 
+          (click)="openEditModal(playlist, $event)"
+          title="Modifier"
+        >
+          ✏️
+        </button>
+        <button 
+          class="action-btn" 
+          (click)="exportPlaylist(playlist.id, $event)"
+          title="Exporter"
+        >
+          📤
+        </button>
+        <button 
+          class="action-btn delete" 
+          (click)="deletePlaylist(playlist.id, $event)"
+          title="Supprimer"
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucune playlist -->
+  <div *ngIf="!isLoading && filteredPlaylists.length === 0" class="empty-state">
+    <div class="empty-icon">🎵</div>
+    <h2>Aucune playlist trouvée</h2>
+    <p>Créez votre première playlist ou importez-en une depuis un fichier</p>
+    <button class="btn-primary" (click)="openCreateModal()">
+      Créer ma première playlist
+    </button>
+  </div>
+
+  <!-- Détails de la playlist sélectionnée -->
+  <div *ngIf="selectedPlaylist" class="playlist-details">
+    <div class="details-header">
+      <img [src]="selectedPlaylist.coverImage" [alt]="selectedPlaylist.name" />
+      <div class="details-info">
+        <h2>{{ selectedPlaylist.name }}</h2>
+        <p>{{ selectedPlaylist.description }}</p>
+        <div class="details-meta">
+          <span>{{ selectedPlaylist.songs.length }} titres</span>
+          <span>•</span>
+          <span>{{ getTotalDuration(selectedPlaylist) }}</span>
+          <span>•</span>
+          <span>{{ selectedPlaylist.isPublic ? 'Public' : 'Privé' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="songs-list">
+      <h3>Titres</h3>
+      <div *ngFor="let song of selectedPlaylist.songs; let i = index" class="song-item">
+        <span class="song-number">{{ i + 1 }}</span>
+        <img [src]="song.coverUrl" [alt]="song.title" class="song-cover" />
+        <div class="song-info">
+          <p class="song-title">{{ song.title }}</p>
+          <p class="song-artist">{{ song.artist }}</p>
+        </div>
+        <span class="song-duration">{{ song.duration }}</span>
+        <button 
+          class="remove-btn" 
+          (click)="removeSongFromPlaylist(song.id)"
+          title="Retirer"
+        >
+          ❌
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Création -->
+<div *ngIf="showCreateModal" class="modal-overlay" (click)="closeCreateModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Créer une Playlist</h2>
+      <button class="close-btn" (click)="closeCreateModal()">✕</button>
+    </div>
+    
+    <form (ngSubmit)="createPlaylist()">
+      <div class="form-group">
+        <label>Nom de la playlist *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="newPlaylist.name" 
+          name="name"
+          placeholder="Ma super playlist"
+          required
+        />
+      </div>
+      
+      <div class="form-group">
+        <label>Description</label>
+        <textarea 
+          [(ngModel)]="newPlaylist.description"
+          name="description"
+          placeholder="Une description de votre playlist..."
+          rows="3"
+        ></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>URL de l'image de couverture</label>
+        <input 
+          type="url" 
+          [(ngModel)]="newPlaylist.coverImage"
+          name="coverImage"
+          placeholder="https://..."
+        />
+      </div>
+      
+      <div class="form-group checkbox">
+        <label>
+          <input 
+            type="checkbox" 
+            [(ngModel)]="newPlaylist.isPublic"
+            name="isPublic"
+          />
+          Rendre cette playlist publique
+        </label>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeCreateModal()">
+          Annuler
+        </button>
+        <button type="submit" class="btn-primary">
+          Créer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Importation -->
+<div *ngIf="showImportModal" class="modal-overlay" (click)="closeImportModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Importer une Playlist</h2>
+      <button class="close-btn" (click)="closeImportModal()">✕</button>
+    </div>
+    
+    <div class="import-zone">
+      <div class="file-input-wrapper">
+        <input 
+          type="file" 
+          accept=".json"
+          (change)="onFileSelected($event)"
+          id="fileInput"
+        />
+        <label for="fileInput" class="file-label">
+          <span class="file-icon">📁</span>
+          <span>Choisir un fichier JSON</span>
+        </label>
+      </div>
+      <p class="help-text">
+        Sélectionnez un fichier JSON contenant les données de votre playlist
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Édition -->
+<div *ngIf="showEditModal" class="modal-overlay" (click)="closeEditModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Modifier la Playlist</h2>
+      <button class="close-btn" (click)="closeEditModal()">✕</button>
+    </div>
+    
+    <form (ngSubmit)="updatePlaylist()" *ngIf="selectedPlaylist">
+      <div class="form-group">
+        <label>Nom de la playlist *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="selectedPlaylist.name" 
+          name="name"
+          required
+        />
+      </div>
+      
+      <div class="form-group">
+        <label>Description</label>
+        <textarea 
+          [(ngModel)]="selectedPlaylist.description"
+          name="description"
+          rows="3"
+        ></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>URL de l'image de couverture</label>
+        <input 
+          type="url" 
+          [(ngModel)]="selectedPlaylist.coverImage"
+          name="coverImage"
+        />
+      </div>
+      
+      <div class="form-group checkbox">
+        <label>
+          <input 
+            type="checkbox" 
+            [(ngModel)]="selectedPlaylist.isPublic"
+            name="isPublic"
+          />
+          Playlist publique
+        </label>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeEditModal()">
+          Annuler
+        </button>
+        <button type="submit" class="btn-primary">
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
